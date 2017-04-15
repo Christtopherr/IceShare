@@ -467,8 +467,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		try {
 			regCliente = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
 
-			conexaoServidor = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
-			conexaoServidor.registrarCliente(cliente);
+			IServer conecServArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
 
 			byte[] arqBytes = conexaoServidor.baixarArquivo(cliente, arquivo);
 
