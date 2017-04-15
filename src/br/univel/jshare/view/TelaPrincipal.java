@@ -92,6 +92,8 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	private JScrollPane scrollPane_1;
 	private JTextArea textAreaPainel;
 
+	private IServer conectArq;
+
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -467,15 +469,15 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		try {
 			regCliente = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
 
-			IServer conecServArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
+			conectArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
 
-			byte[] arqBytes = conexaoServidor.baixarArquivo(cliente, arquivo);
+			byte[] arqBytes = conectArq.baixarArquivo(cliente, arquivo);
 
 			String Md5Arqcop = new Util().getMD5(arquivo.getPath());
 
 			if (arquivo.getMd5().equals(Md5Arqcop)) {
 
-				arquivodown(new File("Download do " + arquivo.getNome()), arqBytes, arquivo);
+				arquivodown(cliente, new File("Download do " + arquivo.getNome()), arqBytes, arquivo);
 
 			}
 
@@ -484,12 +486,14 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		}
 	}
 
-	private void arquivodown(File file, byte[] arqBytes, Arquivo arq) {
+	private void arquivodown(Cliente cliente,  File file, byte[] arqBytes, Arquivo arq) {
 		// TODO Auto-generated method stub
 
 		try {
 			Files.write(Paths.get(PATH_DOW_UP.concat("\\" + file.getName() + arq.getExtensao())), arqBytes,
 					StandardOpenOption.CREATE);
+			
+			imprimirLog("Usuário " + cliente.getNome() + " Baixou o arquivo: " + arq.getNome() + arq.getExtensao());
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -505,7 +509,8 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		btnDesconectServer.setEnabled(false);
 
 	}
-
+	
+	// Corrigido para nao ficar mandando client em toda vez q busca os arquivos.
 	public Cliente createClienteLocal() {
 		Cliente cliente = new Cliente();
 		cliente.setId(new Long(idCliente++));
@@ -517,7 +522,8 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 		return clienteLocal;
 	}
-
+	
+	// Apenas para ter o retorno.
 	public Cliente getClienteLocal() {
 		return clienteLocal;
 	}
