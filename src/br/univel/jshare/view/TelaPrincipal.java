@@ -469,10 +469,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		try {
 			regCliente = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
 
-			conectArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
-
-			byte[] arqBytes = conectArq.baixarArquivo(cliente, arquivo);
-
+			
 			String Md5Arqcop = new Util().getMD5(arquivo.getPath());
 
 			if (arquivo.getMd5().equals(Md5Arqcop)) {
