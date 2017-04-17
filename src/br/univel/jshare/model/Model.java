@@ -26,7 +26,7 @@ public class Model extends AbstractTableModel implements TableModel {
 			linhas += e.getValue().size();
 		}
 
-		matriz = new Object[linhas][8];
+		matriz = new Object[linhas][9];
 
 		int linha = 0;
 
@@ -40,6 +40,7 @@ public class Model extends AbstractTableModel implements TableModel {
 				matriz[linha][5] = arq.getExtensao();
 				matriz[linha][6] = arq.getTamanho();
 				matriz[linha][7] = arq.getMd5();
+				matriz[linha][8] = arq.getDataHoraModificacao();
 				linha++;
 			}
 		}
@@ -47,7 +48,7 @@ public class Model extends AbstractTableModel implements TableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 8;
+		return 9;
 	}
 
 	@Override
@@ -81,6 +82,8 @@ public class Model extends AbstractTableModel implements TableModel {
 			return "Tamanho";
 		case 7: 
 			return "Md5";
+		case 8: 
+			return "Data/Hora";
 
 		default:
 			return null;
@@ -99,7 +102,6 @@ public class Model extends AbstractTableModel implements TableModel {
 		
 		// Monta o arquivo passando a posição da linha e o indice de cada atributo correspondente
 		Arquivo arquivo = new Arquivo();
-		// Id??
 		arquivo.setNome(String.valueOf(matriz[row][3]));
 		arquivo.setExtensao(String.valueOf(matriz[row][4]));
 		arquivo.setTamanho(Long.valueOf(String.valueOf(matriz[row][5])));

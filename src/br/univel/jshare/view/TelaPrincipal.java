@@ -96,8 +96,6 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	private long totalDown;
 	private JLabel lblTotalUp;
 
-	protected Arquivo arquivo;
-
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
