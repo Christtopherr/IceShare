@@ -51,6 +51,7 @@ import br.univel.jshare.comum.IServer;
 import br.univel.jshare.comum.TipoFiltro;
 import br.univel.jshare.model.Model;
 import br.univel.jshare.util.Util;
+import java.awt.Color;
 
 public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
@@ -78,8 +79,6 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	private long idCliente = 0;
 	private Cliente clienteLocal;
 	private long IdE = 0;
-	private List<Cliente> clientes;
-	private JButton btnDesconectar;
 	private JButton btnDesconectServer;
 	private JButton btnPesquisa;
 	private JButton btnDown;
@@ -91,7 +90,6 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	private static final String PATH_DOW_UP = "D:\\Share";
 	private JScrollPane scrollPane_1;
 	private JTextArea textAreaPainel;
-
 	private IServer conectArq;
 
 	public static void main(String[] args) {
@@ -160,6 +158,22 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		gbc_lblPortaS.gridx = 2;
 		gbc_lblPortaS.gridy = 1;
 		contentPane.add(lblPortaS, gbc_lblPortaS);
+
+		btnConectar = new JButton("Conectar");
+		btnConectar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				conectarServidor();
+				btnConectar.setEnabled(false);
+
+			}
+		});
+		GridBagConstraints gbc_btnConectar = new GridBagConstraints();
+		gbc_btnConectar.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnConectar.insets = new Insets(0, 0, 5, 5);
+		gbc_btnConectar.gridx = 4;
+		gbc_btnConectar.gridy = 4;
+		contentPane.add(btnConectar, gbc_btnConectar);
 
 		cmbTipoFiltro = new JComboBox(TipoFiltro.values());
 		cmbTipoFiltro.setToolTipText("Filtro");
@@ -284,22 +298,6 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		contentPane.add(txtPortaC, gbc_txtPortaC);
 		txtPortaC.setColumns(10);
 
-		btnConectar = new JButton("Conectar");
-		btnConectar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-
-				conectarServidor();
-				btnConectar.setEnabled(false);
-
-			}
-		});
-		GridBagConstraints gbc_btnConectar = new GridBagConstraints();
-		gbc_btnConectar.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnConectar.insets = new Insets(0, 0, 5, 0);
-		gbc_btnConectar.gridx = 5;
-		gbc_btnConectar.gridy = 3;
-		contentPane.add(btnConectar, gbc_btnConectar);
-
 		JLabel lblNome = new JLabel("Nome");
 		GridBagConstraints gbc_lblNome = new GridBagConstraints();
 		gbc_lblNome.insets = new Insets(0, 0, 5, 5);
@@ -337,8 +335,8 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		contentPane.add(txtPesquisa, gbc_txtPesquisa);
 		txtPesquisa.setColumns(10);
 
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.addMouseListener(new MouseAdapter() {
+		JScrollPane scrPainelArquivos = new JScrollPane();
+		scrPainelArquivos.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent click) {
@@ -409,20 +407,20 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		gbc_btnDown.gridy = 6;
 		contentPane.add(btnDown, gbc_btnDown);
 
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
-		gbc_scrollPane.gridheight = 2;
-		gbc_scrollPane.gridwidth = 6;
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 0;
-		gbc_scrollPane.gridy = 7;
-		contentPane.add(scrollPane, gbc_scrollPane);
+		GridBagConstraints gbc_scrPainelArquivos = new GridBagConstraints();
+		gbc_scrPainelArquivos.insets = new Insets(0, 0, 5, 0);
+		gbc_scrPainelArquivos.gridheight = 2;
+		gbc_scrPainelArquivos.gridwidth = 6;
+		gbc_scrPainelArquivos.fill = GridBagConstraints.BOTH;
+		gbc_scrPainelArquivos.gridx = 0;
+		gbc_scrPainelArquivos.gridy = 7;
+		contentPane.add(scrPainelArquivos, gbc_scrPainelArquivos);
 
 		table = new JTable();
-		scrollPane.setViewportView(table);
+		scrPainelArquivos.setViewportView(table);
 
 		txtValorFiltro = new JTextField();
-		scrollPane.setColumnHeaderView(txtValorFiltro);
+		scrPainelArquivos.setColumnHeaderView(txtValorFiltro);
 		txtValorFiltro.setToolTipText("Filtro");
 		txtValorFiltro.setText("Filtro");
 		txtValorFiltro.setColumns(10);
@@ -436,9 +434,12 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		contentPane.add(scrollPane_1, gbc_scrollPane_1);
 
 		textAreaPainel = new JTextArea();
+		textAreaPainel.setFont(new Font("Comic Sans MS", Font.PLAIN, 13));
+		textAreaPainel.setForeground(new Color(0, 255, 255));
+		textAreaPainel.setBackground(Color.BLACK);
 		scrollPane_1.setViewportView(textAreaPainel);
 
-		clientes = new ArrayList<Cliente>();
+		new ArrayList<Cliente>();
 
 		fileDefault = new File(PATH_DOW_UP);
 		fileDefault.mkdir();
@@ -469,7 +470,10 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		try {
 			regCliente = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
 
-			
+			conectArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
+
+			byte[] arqBytes = conectArq.baixarArquivo(cliente, arquivo);
+
 			String Md5Arqcop = new Util().getMD5(arquivo.getPath());
 
 			if (arquivo.getMd5().equals(Md5Arqcop)) {
@@ -483,13 +487,13 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		}
 	}
 
-	private void arquivodown(Cliente cliente,  File file, byte[] arqBytes, Arquivo arq) {
+	private void arquivodown(Cliente cliente, File file, byte[] arqBytes, Arquivo arq) {
 		// TODO Auto-generated method stub
 
 		try {
 			Files.write(Paths.get(PATH_DOW_UP.concat("\\" + file.getName() + arq.getExtensao())), arqBytes,
 					StandardOpenOption.CREATE);
-			
+
 			imprimirLog("Usuário " + cliente.getNome() + " Baixou o arquivo: " + arq.getNome() + arq.getExtensao());
 
 		} catch (IOException e) {
@@ -497,6 +501,8 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		}
 
 	}
+
+	// Configuração que iniciara
 
 	private void defaultConfig() {
 		// TODO Auto-generated method stub
@@ -506,7 +512,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		btnDesconectServer.setEnabled(false);
 
 	}
-	
+
 	// Corrigido para nao ficar mandando client em toda vez q busca os arquivos.
 	public Cliente createClienteLocal() {
 		Cliente cliente = new Cliente();
@@ -519,7 +525,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 		return clienteLocal;
 	}
-	
+
 	// Apenas para ter o retorno.
 	public Cliente getClienteLocal() {
 		return clienteLocal;
@@ -531,7 +537,6 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		try {
 			UnicastRemoteObject.unexportObject(servidor, true);
 			servidor = null;
-			
 
 		} catch (NoSuchObjectException e) {
 			e.printStackTrace();
@@ -698,7 +703,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 			e.printStackTrace();
 		}
 
-		imprimirLog("Server ON" );
+		imprimirLog("Server ON");
 
 	}
 
@@ -839,6 +844,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 	}
 
+	// Imprimir no TextArea as informações
 	public void imprimirLog(String texto) {
 		textAreaPainel.append(texto + "\n");
 
