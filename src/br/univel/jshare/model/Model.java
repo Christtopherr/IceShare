@@ -1,5 +1,8 @@
 package br.univel.jshare.model;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +17,7 @@ public class Model extends AbstractTableModel implements TableModel {
 
 	private Object[][] matriz;
 	private int linhas;
+	private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 
 	public Model(Map<Cliente, List<Arquivo>> mapa) {
 
@@ -75,13 +79,36 @@ public class Model extends AbstractTableModel implements TableModel {
 			return "Extensão";
 		case 6:
 			return "Tamanho";
-		case 7:
-			return "MD5";
+		case 7: 
+			return "Md5";
 
 		default:
-			return "Erro";
+			return null;
 		}
 
 	}
-
+	
+	public Map<Cliente, Arquivo> pegarInformacoesArquivo(int row) throws ParseException {
+		Map<Cliente, Arquivo> informacoesArquivo = new HashMap<>();
+		
+		// Monta o cliente com as informações para conexão
+		Cliente cliente = new Cliente();
+		cliente.setNome(String.valueOf(matriz[row][0]));
+		cliente.setIp(String.valueOf(matriz[row][1]));
+		cliente.setPorta(Integer.parseInt(String.valueOf(matriz[row][2])));		
+		
+		// Monta o arquivo passando a posição da linha e o indice de cada atributo correspondente
+		Arquivo arquivo = new Arquivo();
+		// Id??
+		arquivo.setNome(String.valueOf(matriz[row][3]));
+		arquivo.setExtensao(String.valueOf(matriz[row][4]));
+		arquivo.setTamanho(Long.valueOf(String.valueOf(matriz[row][5])));
+		arquivo.setPath(String.valueOf(matriz[row][6]));
+		arquivo.setMd5(String.valueOf(matriz[row][7]));
+		arquivo.setDataHoraModificacao(sdf.parse(String.valueOf(matriz[row][8])));
+		
+		informacoesArquivo.put(cliente, arquivo);
+		
+		return informacoesArquivo;
+	}
 }

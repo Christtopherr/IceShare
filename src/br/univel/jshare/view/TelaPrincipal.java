@@ -86,8 +86,8 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	private JLabel lblCliente;
 	private JTextField txtValorFiltro;
 	private JComboBox cmbTipoFiltro;
-	private Thread atualizarDir;
-	private static final String PATH_DOW_UP = "D:\\Share";
+	private Thread atualizaDir;
+	private static final String PATH_DOW_UP = "./Share";
 	private JScrollPane scrollPane_1;
 	private JTextArea textAreaPainel;
 	private IServer conectArq;
@@ -132,8 +132,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 		lblServer = new JLabel("Server");
 		lblServer.setDisplayedMnemonic(' ');
-		lblServer.setIcon(
-				new ImageIcon("D:\\workspace\\IceShare\\bin\\Img2.gif"));
+		lblServer.setIcon(new ImageIcon("D:\\workspace\\IceShare\\bin\\Img2.gif"));
 		lblServer.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_lblServer = new GridBagConstraints();
 		gbc_lblServer.insets = new Insets(0, 0, 5, 5);
@@ -259,8 +258,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		contentPane.add(btnDesconectServer, gbc_btnDesconectServer);
 
 		lblCliente = new JLabel("Cliente");
-		lblCliente.setIcon(
-				new ImageIcon("D:\\workspace\\IceShare\\bin\\Img1.gif"));
+		lblCliente.setIcon(new ImageIcon("D:\\workspace\\IceShare\\bin\\Img1.gif"));
 		lblCliente.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_lblCliente = new GridBagConstraints();
 		gbc_lblCliente.insets = new Insets(0, 0, 5, 5);
@@ -349,9 +347,9 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 				if (click.getClickCount() == 2) {
 
-					int linhaSelecionada = table.getSelectedRow();
+					int arquivoSelect = table.getSelectedRow();
 
-					getArquivoCliente(clienteLocal, arquivo, linhaSelecionada);
+					getArquivoCliente(arquivoSelect);
 
 				}
 
@@ -363,7 +361,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		btnDown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				getArquivoCliente(clienteLocal, arquivo, table.getSelectedRow());
+				getArquivoCliente(table.getSelectedRow());
 
 			}
 		});
@@ -412,14 +410,14 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		gbc_btnDown.gridx = 2;
 		gbc_btnDown.gridy = 6;
 		contentPane.add(btnDown, gbc_btnDown);
-		
+
 		lblTotalDown = new JLabel("  Download: 0");
 		GridBagConstraints gbc_lblTotalDown = new GridBagConstraints();
 		gbc_lblTotalDown.insets = new Insets(0, 0, 5, 5);
 		gbc_lblTotalDown.gridx = 4;
 		gbc_lblTotalDown.gridy = 6;
 		contentPane.add(lblTotalDown, gbc_lblTotalDown);
-		
+
 		lblTotalUp = new JLabel(" Upload: 0");
 		GridBagConstraints gbc_lblTotalUp = new GridBagConstraints();
 		gbc_lblTotalUp.insets = new Insets(0, 0, 5, 0);
@@ -470,36 +468,24 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 	}
 
-	protected void getArquivoCliente(Cliente cliente, Arquivo arquivo, int linhaSelecionada) {
-		
-		
+	protected void getArquivoCliente(int arquivoselect) {
 
-		// Cliente
-		cliente.setNome(table.getValueAt(linhaSelecionada, 0).toString());
-		cliente.setIp(table.getValueAt(linhaSelecionada, 1).toString());
-		cliente.setPorta(Integer.parseInt(table.getValueAt(linhaSelecionada, 2).toString()));
-
-		// Arquivo
-		arquivo.setNome(table.getValueAt(linhaSelecionada, 3).toString());
-		arquivo.setPath(table.getValueAt(linhaSelecionada, 4).toString());
-		arquivo.setExtensao(table.getValueAt(linhaSelecionada, 5).toString());
-		arquivo.setTamanho(new Long(table.getValueAt(linhaSelecionada, 6).toString()));
-		arquivo.setMd5(table.getValueAt(linhaSelecionada, 7).toString());
+		Cliente cliente = new Cliente();
+		Arquivo arquivo = new Arquivo();
 
 		try {
 			regCliente = LocateRegistry.getRegistry(cliente.getIp(), cliente.getPorta());
 
-			conectArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
+			IServer conectArq = (IServer) regCliente.lookup(IServer.NOME_SERVICO);
 
 			byte[] arqBytes = conectArq.baixarArquivo(cliente, arquivo);
 
-				arquivodown(cliente, new File("Download do " + arquivo.getNome()), arqBytes, arquivo);
+			arquivodown(cliente, new File("Download do " + arquivo.getNome()), arqBytes, arquivo);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
 
 	private void arquivodown(Cliente cliente, File file, byte[] arqBytes, Arquivo arq) {
 		// TODO Auto-generated method stub
@@ -549,8 +535,14 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	protected void desligarServidor() {
 
 		try {
-			UnicastRemoteObject.unexportObject(servidor, true);
-			servidor = null;
+			UnicastRemoteObject.unexportObject(TelaPrincipal.this, true);
+			conexaoServidor = null;
+			regSv = null;
+			if (!(atualizaDir == null)) {
+				atualizaDir.interrupt();
+			}
+
+			imprimirLog("Servidor Off");
 
 		} catch (NoSuchObjectException e) {
 			e.printStackTrace();
@@ -608,7 +600,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	}
 
 	private String getFileExtension(File file2) {
-		String fileName = fileDefault.getName();
+		String fileName = file2.getName();
 		if (fileName.lastIndexOf(".") != -1 && fileName.lastIndexOf(".") != 0)
 			return fileName.substring(fileName.lastIndexOf(".") + 1);
 		else
@@ -652,7 +644,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 			conexaoServidor.publicarListaArquivos(cliente, getArquivosDisponiveis());
 
-			Thread thread = new Thread(new Runnable() {
+			atualizaDir = new Thread(new Runnable() {
 
 				@Override
 				public void run() {
@@ -674,7 +666,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 				}
 			});
 
-			thread.start();
+			atualizaDir.start();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -843,25 +835,34 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 		return shArq;
 	}
-	
-	public void addDown(long size){
+
+	public void addDown(long size) {
 		totalDown += size;
-		lblTotalDown.setText("Download: "+totalDown+"B");
+		lblTotalDown.setText("Download: " + totalDown + "B");
 	}
-	
-	public void addUp(long size){
+
+	public void addUp(long size) {
 		totalUp += size;
-		lblTotalUp.setText(" Upload: "+totalUp+"B");
+		lblTotalUp.setText(" Upload: " + totalUp + "B");
 	}
-	
 
 	@Override
-	public void desconectar(Cliente c) throws RemoteException {
+	public void desconectar(Cliente cliente) throws RemoteException {
 		// TODO Auto-generated method stub
 
-		if (servidor != null) {
-			servidor.desconectar(c);
-			servidor = null;
+		if (cliente != null) {
+
+			if (clientmap.containsKey(cliente)) {
+
+				clientmap.remove(cliente);
+				btnConectar.setEnabled(true);
+				btnPesquisa.setEnabled(false);
+				txtIpS.setEditable(true);
+				txtPortaServer.setEditable(true);
+				txtNomeCliente.setEditable(true);
+				imprimirLog(cliente.getNome() + " Saiu...");
+			}
+
 		}
 
 	}
@@ -871,6 +872,5 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		textAreaPainel.append(texto + "\n");
 
 	}
-	
 
 }
