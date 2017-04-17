@@ -91,6 +91,12 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 	private JScrollPane scrollPane_1;
 	private JTextArea textAreaPainel;
 	private IServer conectArq;
+	private JLabel lblTotalDown;
+	private long totalUp;
+	private long totalDown;
+	private JLabel lblTotalUp;
+
+	protected Arquivo arquivo;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -127,7 +133,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		lblServer = new JLabel("Server");
 		lblServer.setDisplayedMnemonic(' ');
 		lblServer.setIcon(
-				new ImageIcon("D:\\Christopher\\Downloads\\picasion.com_53f52148dcc3dfecf12374a0e9c2b3d3.gif"));
+				new ImageIcon("D:\\workspace\\IceShare\\bin\\Img2.gif"));
 		lblServer.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_lblServer = new GridBagConstraints();
 		gbc_lblServer.insets = new Insets(0, 0, 5, 5);
@@ -254,7 +260,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 		lblCliente = new JLabel("Cliente");
 		lblCliente.setIcon(
-				new ImageIcon("D:\\Christopher\\Downloads\\picasion.com_e2edcc6b6dd98ef8ceec12727ae72d2e.gif"));
+				new ImageIcon("D:\\workspace\\IceShare\\bin\\Img1.gif"));
 		lblCliente.setFont(new Font("Tahoma", Font.BOLD, 12));
 		GridBagConstraints gbc_lblCliente = new GridBagConstraints();
 		gbc_lblCliente.insets = new Insets(0, 0, 5, 5);
@@ -345,7 +351,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 					int linhaSelecionada = table.getSelectedRow();
 
-					getArquivoCliente(linhaSelecionada);
+					getArquivoCliente(clienteLocal, arquivo, linhaSelecionada);
 
 				}
 
@@ -357,7 +363,7 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		btnDown.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				getArquivoCliente(table.getSelectedRow());
+				getArquivoCliente(clienteLocal, arquivo, table.getSelectedRow());
 
 			}
 		});
@@ -406,6 +412,20 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		gbc_btnDown.gridx = 2;
 		gbc_btnDown.gridy = 6;
 		contentPane.add(btnDown, gbc_btnDown);
+		
+		lblTotalDown = new JLabel("  Download: 0");
+		GridBagConstraints gbc_lblTotalDown = new GridBagConstraints();
+		gbc_lblTotalDown.insets = new Insets(0, 0, 5, 5);
+		gbc_lblTotalDown.gridx = 4;
+		gbc_lblTotalDown.gridy = 6;
+		contentPane.add(lblTotalDown, gbc_lblTotalDown);
+		
+		lblTotalUp = new JLabel(" Upload: 0");
+		GridBagConstraints gbc_lblTotalUp = new GridBagConstraints();
+		gbc_lblTotalUp.insets = new Insets(0, 0, 5, 0);
+		gbc_lblTotalUp.gridx = 5;
+		gbc_lblTotalUp.gridy = 6;
+		contentPane.add(lblTotalUp, gbc_lblTotalUp);
 
 		GridBagConstraints gbc_scrPainelArquivos = new GridBagConstraints();
 		gbc_scrPainelArquivos.insets = new Insets(0, 0, 5, 0);
@@ -450,10 +470,9 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 	}
 
-	protected void getArquivoCliente(int linhaSelecionada) {
-
-		Cliente cliente = new Cliente();
-		Arquivo arquivo = new Arquivo();
+	protected void getArquivoCliente(Cliente cliente, Arquivo arquivo, int linhaSelecionada) {
+		
+		
 
 		// Cliente
 		cliente.setNome(table.getValueAt(linhaSelecionada, 0).toString());
@@ -474,18 +493,13 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 
 			byte[] arqBytes = conectArq.baixarArquivo(cliente, arquivo);
 
-			String Md5Arqcop = new Util().getMD5(arquivo.getPath());
-
-			if (arquivo.getMd5().equals(Md5Arqcop)) {
-
 				arquivodown(cliente, new File("Download do " + arquivo.getNome()), arqBytes, arquivo);
-
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	
 
 	private void arquivodown(Cliente cliente, File file, byte[] arqBytes, Arquivo arq) {
 		// TODO Auto-generated method stub
@@ -824,14 +838,22 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 			shArq = Files.readAllBytes(path);
 
 		} catch (IOException e) {
-
-			JOptionPane.showMessageDialog(TelaPrincipal.this, "Impossivel verificar arquivo", "Erro",
-					JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
 		}
 
 		return shArq;
 	}
+	
+	public void addDown(long size){
+		totalDown += size;
+		lblTotalDown.setText("Download: "+totalDown+"B");
+	}
+	
+	public void addUp(long size){
+		totalUp += size;
+		lblTotalUp.setText(" Upload: "+totalUp+"B");
+	}
+	
 
 	@Override
 	public void desconectar(Cliente c) throws RemoteException {
@@ -849,4 +871,6 @@ public class TelaPrincipal extends JFrame implements IServer, Serializable {
 		textAreaPainel.append(texto + "\n");
 
 	}
+	
+
 }
